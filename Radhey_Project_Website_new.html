@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>F1 Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#000; --red:#e10600; --deep:#7a0300; --ink:#f5f1f0; --muted:#c9b8b6;
+    --line:rgba(255,255,255,.16); --panel:rgba(0,0,0,.55);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;min-height:100%;background:#000}
+  body{
+    margin:0;min-height:100vh;color:var(--ink);
+    font:400 17px/1.6 "Barlow",system-ui,sans-serif;
+    background:linear-gradient(165deg,#000 0%,#0a0000 30%,var(--deep) 70%,var(--red) 100%) fixed;
+  }
+  h1,h2{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;line-height:1.05;margin:0;letter-spacing:.01em}
+  a{color:#ff8a84}
+  :focus-visible{outline:3px solid #fff;outline-offset:2px}
+
+  header{position:sticky;top:0;z-index:5;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);border-bottom:2px solid var(--red)}
+  .bar{max-width:1280px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:1.6rem;display:flex;align-items:center;gap:10px}
+  .brand::before{content:"";width:28px;height:6px;background:var(--red);transform:skewX(-30deg)}
+  nav{display:flex;gap:4px}
+  nav button{font:600 1rem "Barlow",sans-serif;color:var(--muted);background:none;border:0;border-radius:6px;padding:8px 18px;cursor:pointer}
+  nav button:hover{color:#fff}
+  nav button[aria-selected="true"]{background:var(--red);color:#fff}
+
+  .intro{max-width:1280px;margin:0 auto;padding:56px 24px 28px}
+  .intro h1{font-size:clamp(2.8rem,8vw,5.5rem);font-weight:700;max-width:14ch}
+  .intro p{max-width:60ch;color:var(--muted);margin:16px 0 0;font-size:1.1rem}
+
+  main{max-width:1280px;margin:0 auto;padding:0 24px 64px}
+  .panel{display:none;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;min-height:300px}
+  .panel.active{display:block}
+  .panel h2{font-size:1.8rem;padding:12px 12px 4px}
+  .panel .sub{color:var(--muted);padding:0 12px 12px;margin:0}
+  .viz-wrap{background:#fff;border-radius:8px;overflow:hidden}
+  tableau-viz{display:block;width:100%}
+
+  .setup{margin:12px;padding:20px;border:2px dashed var(--line);border-radius:10px;color:var(--muted)}
+  .about{padding:12px 20px 24px;max-width:70ch}
+  .about ul{padding-left:1.2em}
+
+  footer{max-width:1280px;margin:0 auto;padding:0 24px 40px;color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <span class="brand" id="brand"></span>
+    <nav role="tablist" aria-label="Sections">
+      <button role="tab" aria-selected="true"  aria-controls="dashboard" id="t-dashboard">Dashboard</button>
+      <button role="tab" aria-selected="false" aria-controls="story"     id="t-story">Story</button>
+      <button role="tab" aria-selected="false" aria-controls="about"     id="t-about">About</button>
+    </nav>
+  </div>
+</header>
+
+<section class="intro">
+  <h1 id="headline"></h1>
+  <p id="lede"></p>
+</section>
+
+<main>
+  <section class="panel active" id="dashboard" role="tabpanel" aria-labelledby="t-dashboard">
+    <h2>Dashboard</h2>
+    <p class="sub" id="dash-sub"></p>
+    <div id="dash-holder"></div>
+  </section>
+
+  <section class="panel" id="story" role="tabpanel" aria-labelledby="t-story">
+    <h2>Story</h2>
+    <p class="sub" id="story-sub"></p>
+    <div id="story-holder"></div>
+  </section>
+
+  <section class="panel" id="about" role="tabpanel" aria-labelledby="t-about">
+    <div class="about">
+      <h2 style="padding:0 0 12px">About this project</h2>
+      <p id="about-text"></p>
+      <ul id="about-list"></ul>
+    </div>
+  </section>
+</main>
+
+<footer id="footer"></footer>
+
+<script type="module" src="https://public.tableau.com/javascripts/api/tableau.embedding.3.latest.min.js"></script>
+
+<script>
+const CONFIG = {
+  siteName: "F1 Analysis",
+  headline: "Formula 1, by the numbers",
+  lede: "An interactive dashboard and a guided story built in Tableau. Explore the data yourself, or follow the story for the key findings.",
+
+  dashboardUrl: "https://public.tableau.com/views/F1AnalysisDashBoard/Dashboard1",
+  dashboardNote: "Click, filter and hover to explore.",
+  dashboardHeight: 850,
+
+  storyUrl: "https://public.tableau.com/views/F1AnalysisStory/Story1",
+  storyNote: "Use the arrows or the story points to move through the findings.",
+  storyHeight: 850,
+
+  aboutText: "This project analyses Formula 1 data using Tableau.",
+  aboutList: [
+    "Data source: Kaggel",
+    "Tools: Tableau Public",
+    "Author: Radhey"
+  ],
+  footer: "Built with Tableau. Data from [source]."
+};
+
+const $ = id => document.getElementById(id);
+document.title = CONFIG.siteName;
+$("brand").textContent = CONFIG.siteName;
+$("headline").textContent = CONFIG.headline;
+$("lede").textContent = CONFIG.lede;
+$("dash-sub").textContent = CONFIG.dashboardNote;
+$("story-sub").textContent = CONFIG.storyNote;
+$("about-text").textContent = CONFIG.aboutText;
+$("footer").textContent = CONFIG.footer;
+CONFIG.aboutList.forEach(t => { const li = document.createElement("li"); li.textContent = t; $("about-list").appendChild(li); });
+
+function embed(holderId, url, height, label){
+  const holder = $(holderId);
+  if (!url || url.includes("YOUR_")) {
+    holder.innerHTML = '<div class="setup"><strong>' + label + ' not connected yet.</strong></div>';
+    return;
+  }
+  const wrap = document.createElement("div");
+  wrap.className = "viz-wrap";
+  const viz = document.createElement("tableau-viz");
+  viz.setAttribute("src", url);
+  viz.setAttribute("toolbar", "bottom");
+  viz.setAttribute("hide-tabs", "");
+  viz.style.height = height + "px";
+  wrap.appendChild(viz);
+  holder.appendChild(wrap);
+}
+embed("dash-holder", CONFIG.dashboardUrl, CONFIG.dashboardHeight, "Dashboard");
+embed("story-holder", CONFIG.storyUrl, CONFIG.storyHeight, "Story");
+
+const tabs = document.querySelectorAll('[role="tab"]');
+function show(name){
+  tabs.forEach(t => t.setAttribute("aria-selected", t.getAttribute("aria-controls") === name));
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === name));
+  history.replaceState(null, "", "#" + name);
+}
+tabs.forEach(t => t.addEventListener("click", () => show(t.getAttribute("aria-controls"))));
+const start = location.hash.slice(1);
+if (["dashboard","story","about"].includes(start)) show(start);
+</script>
+</body>
+</html>
